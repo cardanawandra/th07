@@ -71,7 +71,7 @@ void BombData::SpawnBombInvulnEffect(Player *player)
         player->effect->inUseFlag = 0;
     }
 
-    Effect *effect = g_EffectManager.SpawnSpecialEffect(25, &player->positionCenter, 0,
+    Effect *effect = g_EffectManager.SpawnSpecialEffect(25, &player->positionCenter, 0+(player->effectOffsetPlayer),
                                                         1, 0xffffffff);
     effect->vm.interpStartTimes[4] = 0;
     effect->vm.interpEndTimes[4] = player->invulnerabilityTimer;

@@ -18,6 +18,9 @@
 #include "utils.hpp"
 #include <algorithm>
 
+// #define EFFECT_OFFSET_PLAYER 0
+#define EFFECT_OFFSET_PLAYER (this->effectOffsetPlayer)
+
 // GLOBAL: TH07 0x0049ecb0
 ShtFunc1 g_ShtFireFuncs[6] = {
     NULL,
@@ -1244,7 +1247,7 @@ void Player::ScoreGraze(Float3 *param_1)
 void Player::Die()
 {
     g_GameManager.RegenerateGameIntegrityCsum();
-    g_EffectManager.SpawnSpecialEffect(12, &this->positionCenter, 3+(this->playerType-1), 1, 0xff4040ff);
+    g_EffectManager.SpawnSpecialEffect(12, &this->positionCenter, 3+EFFECT_OFFSET_PLAYER, 1, 0xff4040ff);
     g_EffectManager.SpawnEffect(6, &this->positionCenter, 16, 0xffffffff);
     this->playerState = PLAYER_STATE_DEAD;
     this->invulnerabilityTimer = 0;
@@ -1449,7 +1452,7 @@ i32 Player::HandlePlayerInputs()
             {
                 this->optionState = OPTION_FOCUSING;
                 this->focusEffect = g_EffectManager.SpawnSpecialEffect(
-                    this->playerEffectAttach, &this->positionCenter, 2+(this->playerType-1), 1, 0xffffffff);
+                    this->playerEffectAttach, &this->positionCenter, 2+EFFECT_OFFSET_PLAYER, 1, 0xffffffff);
             }
             else
             {
@@ -1508,7 +1511,7 @@ i32 Player::HandlePlayerInputs()
                 this->optionState = OPTION_FOCUSING;
                 this->focusMovementTimer = 8 - this->focusMovementTimer.GetCurrent();
                 this->focusEffect = g_EffectManager.SpawnSpecialEffect(
-                    this->playerEffectAttach, &this->positionCenter, 2, 1, 0xffffffff);
+                    this->playerEffectAttach, &this->positionCenter, 2+EFFECT_OFFSET_PLAYER, 1, 0xffffffff);
                 goto CASE_OPTION_FOCUSING;
             }
         }
@@ -1532,7 +1535,7 @@ i32 Player::HandlePlayerInputs()
             {
                 this->optionState = OPTION_FOCUSING;
                 this->focusEffect = g_EffectManager.SpawnSpecialEffect(
-                    this->playerEffectAttach, &this->positionCenter, 2, 1, 0xffffffff);
+                    this->playerEffectAttach, &this->positionCenter, 2+EFFECT_OFFSET_PLAYER, 1, 0xffffffff);
                 goto CASE_OPTION_FOCUSING_2;
             }
             this->optionsPosition[0].x -= optionOffsetX;
@@ -1600,7 +1603,7 @@ i32 Player::HandlePlayerInputs()
                 this->optionState = OPTION_FOCUSING;
                 this->focusMovementTimer = 8 - this->focusMovementTimer.GetCurrent();
                 this->focusEffect = g_EffectManager.SpawnSpecialEffect(
-                    this->playerEffectAttach, &this->positionCenter, 2, 1, 0xffffffff);
+                    this->playerEffectAttach, &this->positionCenter, 2+EFFECT_OFFSET_PLAYER, 1, 0xffffffff);
                 goto CASE_OPTION_FOCUSING_2;
             }
             this->focusMovementTimer++;
@@ -2136,7 +2139,7 @@ void Player::ActivateBorder()
             this->effect->inUseFlag = 0;
             this->effect = NULL;
         }
-        spawnedEffect = g_EffectManager.SpawnSpecialEffect(28, &this->positionCenter, 4+(this->playerType-1), 1,
+        spawnedEffect = g_EffectManager.SpawnSpecialEffect(28, &this->positionCenter, 4+EFFECT_OFFSET_PLAYER, 1,
                                                            0xffffffff);
         spawnedEffect->vm.interpStartTimes[4] = 0;
         spawnedEffect->vm.interpEndTimes[4] = this->invulnerabilityTimer.GetCurrent();
@@ -2169,7 +2172,7 @@ void Player::BreakBorder(u32 unused)
         this->borderEffect->inUseFlag = 0;
         this->borderEffect = NULL;
     }
-    effect = g_EffectManager.SpawnSpecialEffect(28, &this->positionCenter, 4+(this->playerType-1), 1,
+    effect = g_EffectManager.SpawnSpecialEffect(28, &this->positionCenter, 4+EFFECT_OFFSET_PLAYER, 1,
                                                 0xffffffff);
     effect->vm.interpStartTimes[4] = 0;
     effect->vm.interpEndTimes[4] = 30;
@@ -2463,11 +2466,13 @@ ZunResult Player::AddedCallback(Player *arg)
     // compatslop
     arg->anmOffsetPlayer = 0;
     arg->anmFilePlayer = 0;
+    arg->effectOffsetPlayer = 0;
     arg->shotType = g_GameManager.shotType;
     arg->shotTypeAndCharacter = g_GameManager.shotTypeAndCharacter;
     arg->character = g_GameManager.character;
 
     if(arg->playerType==2){
+        arg->effectOffsetPlayer = 8;
         arg->anmOffsetPlayer = OFFSET_PLAYER_2;
         arg->anmFilePlayer = OFFSET_FILE_PLAYER2;
         arg->shotTypeAndCharacter = g_GameManager.shotTypeAndCharacter2;
@@ -2475,6 +2480,7 @@ ZunResult Player::AddedCallback(Player *arg)
         arg->shotType = g_GameManager.shotType2;
     }
     if(arg->playerType==3){
+        arg->effectOffsetPlayer = 16;
         arg->anmOffsetPlayer = OFFSET_PLAYER_3;
         arg->anmFilePlayer = OFFSET_FILE_PLAYER3;
         arg->shotTypeAndCharacter = g_GameManager.shotTypeAndCharacter3;

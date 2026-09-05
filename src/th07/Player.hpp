@@ -329,6 +329,7 @@ struct Player
     // sprite
     i32 anmFilePlayer;
     i32 anmOffsetPlayer;
+    i32 effectOffsetPlayer;
 };
 // C_ASSERT(sizeof(Player) == 0xb7e78);
 extern Player g_Player;

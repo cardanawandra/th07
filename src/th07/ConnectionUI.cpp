@@ -225,7 +225,7 @@ void ConnectionUI::CreateControls(HWND hWnd)
     m_btnStartGameLocal = CreateWindowA("BUTTON", "Start Offline", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 240, 300, 200,
                                         32, hWnd, (HMENU)IDC_BTN_START_GAME_LOCAL, NULL, NULL);
 
-    CreateWindowA("STATIC", "Note: maybe y'all want sbrik1111 mod instead", WS_CHILD | WS_VISIBLE, 20, 350, 300, 20,
+    CreateWindowA("STATIC", "Desc: all too familiar co-op mod", WS_CHILD | WS_VISIBLE, 20, 350, 300, 20,
                   hWnd, NULL, NULL, NULL);
     CreateWindowA("STATIC", "Modders: Rueee and Cardana Wandra", WS_CHILD | WS_VISIBLE, 20, 375, 300, 20, hWnd, NULL,
                   NULL, NULL);

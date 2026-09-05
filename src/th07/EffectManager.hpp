@@ -39,7 +39,8 @@ struct EffectTypeInfo
 };
 
 #define MAX_NORMAL_EFFECTS 400
-#define MAX_SPECIAL_EFFECTS 8
+//#define MAX_SPECIAL_EFFECTS 8
+#define MAX_SPECIAL_EFFECTS 24
 #define MAX_EFFECTS (MAX_NORMAL_EFFECTS + MAX_SPECIAL_EFFECTS)
 
 struct EffectManager
@@ -108,5 +109,5 @@ struct EffectManager
     Effect *layerPtrs[4];
     i32 frameCounter;
 };
-C_ASSERT(sizeof(EffectManager) == 0x496a8);
+// C_ASSERT(sizeof(EffectManager) == 0x496a8);
 extern EffectManager g_EffectManager;
