@@ -20,6 +20,11 @@
 
 // #define EFFECT_OFFSET_PLAYER 0
 #define EFFECT_OFFSET_PLAYER (this->effectOffsetPlayer)
+#ifdef TWO_PLAYER
+#define SIZE_PLAYER 2
+#else
+#define SIZE_PLAYER 3
+#endif
 
 // GLOBAL: TH07 0x0049ecb0
 ShtFunc1 g_ShtFireFuncs[6] = {
@@ -98,7 +103,9 @@ extern i32 TH_BUTTON_RIGHT_MAP[CONTROL_RECEIVER];// = {0,TH_BUTTON_RIGHT,TH_BUTT
 // GLOBAL: TH07 0x004bdad8
 Player g_Player;
 Player g_Player2;
+#ifndef TWO_PLAYER
 Player g_Player3;
+#endif
 
 // FUNCTION: TH07 0x0043bbd0
 void DefaultFireBulletCallback(Player *player, PlayerBullet *bullet,
@@ -2378,44 +2385,68 @@ f32 Player::RangeToPlayer(Float3 *pos)
 
 // use https://stackoverflow.com/a/66897689 thanks me later
 int NearestPlayer(Float3 *pos){
-    f32 arr[3] = { 
+    f32 arr[SIZE_PLAYER] = { 
         g_Player.RangeToPlayer(pos),
         g_Player2.RangeToPlayer(pos),
+        #ifndef TWO_PLAYER
         g_Player3.RangeToPlayer(pos),
-    } ;   
-    return std::min_element(arr, arr+3) - arr;
+        #endif
+    };
+    return std::min_element(arr, arr+SIZE_PLAYER) - arr;
 }
 f32 Player::DistanceToNearestPlayer(Float3 *pos)
 {
-    f32 arr[3] = { 
+    f32 arr[SIZE_PLAYER] = { 
         g_Player.RangeToPlayer(pos),
         g_Player2.RangeToPlayer(pos),
+        #ifndef TWO_PLAYER
         g_Player3.RangeToPlayer(pos),
+        #endif
     };
-    return *std::min_element(arr, arr+3);
+    return *std::min_element(arr, arr+SIZE_PLAYER);
 }
 f32 Player::AngleToNearestPlayer(Float3 *pos)
 {
-    f32 res[3] = { 
+    f32 res[SIZE_PLAYER] = { 
         g_Player.AngleToPlayer(pos),
         g_Player2.AngleToPlayer(pos),
+        #ifndef TWO_PLAYER
         g_Player3.AngleToPlayer(pos),
+        #endif
     };
     return res[NearestPlayer(pos)];
 }
 f32 Player::XToNearestPlayer(Float3 *pos)
 {
-    f32 res[3] = { g_Player.positionCenter.x, g_Player2.positionCenter.x, g_Player3.positionCenter.x};
+    f32 res[SIZE_PLAYER] = {
+        g_Player.positionCenter.x,
+        g_Player2.positionCenter.x,
+        #ifndef TWO_PLAYER
+        g_Player3.positionCenter.x,
+        #endif
+    };
     return res[NearestPlayer(pos)];
 }
 f32 Player::YToNearestPlayer(Float3 *pos)
 {
-    f32 res[3] = { g_Player.positionCenter.y, g_Player2.positionCenter.y, g_Player3.positionCenter.y};
+    f32 res[SIZE_PLAYER] = {
+        g_Player.positionCenter.y,
+        g_Player2.positionCenter.y,
+        #ifndef TWO_PLAYER
+        g_Player3.positionCenter.y,
+        #endif
+    };
     return res[NearestPlayer(pos)];
 }
 f32 Player::ZToNearestPlayer(Float3 *pos)
 {
-    f32 res[3] = { g_Player.positionCenter.z, g_Player2.positionCenter.z, g_Player3.positionCenter.z};
+    f32 res[SIZE_PLAYER] = {
+        g_Player.positionCenter.z,
+        g_Player2.positionCenter.z,
+        #ifndef TWO_PLAYER
+        g_Player3.positionCenter.z,
+        #endif
+    };
     return res[NearestPlayer(pos)];
 }
 
@@ -2443,25 +2474,6 @@ ZunResult Player::AddedCallback(Player *arg)
 {
     PlayerBullet *bullet;
     i32 i;
-
-    // delete later
-    g_GameManager.shotType2 = g_GameManager.shotType;
-    g_GameManager.shotType3 = g_GameManager.shotType;
-
-    // always big 3
-    g_GameManager.character2 = 1;
-    g_GameManager.character3 = 2;
-    if(g_GameManager.character==1){
-        g_GameManager.character2 = 0;
-        g_GameManager.character3 = 2;
-    }
-    if(g_GameManager.character==2){
-        g_GameManager.character2 = 0;
-        g_GameManager.character3 = 1;
-    }
-
-    g_GameManager.shotTypeAndCharacter2 = g_GameManager.character2 * 2 + g_GameManager.shotType2;
-    g_GameManager.shotTypeAndCharacter3 = g_GameManager.character3 * 2 + g_GameManager.shotType3;
 
     // compatslop
     arg->anmOffsetPlayer = 0;
@@ -2538,11 +2550,19 @@ ZunResult Player::AddedCallback(Player *arg)
     arg->positionCenter.x = g_GameManager.arcadeRegionSize.x / 2.0f;
     arg->positionCenter.y = g_GameManager.arcadeRegionSize.y - 64.0f;
     arg->positionCenter.z = 0.49f;
+    #ifdef TWO_PLAYER
+    if(arg->playerType == 1){
+        arg->positionCenter.x -= 50;
+    }else if(arg->playerType == 2){
+        arg->positionCenter.x += 50;
+    }
+    #else
     if(arg->playerType == 2){
         arg->positionCenter.x += 100;
     }else if(arg->playerType == 3){
         arg->positionCenter.x -= 100;
     }
+    #endif
     arg->optionsPosition[0].z = 0.49f;
     arg->optionsPosition[1].z = 0.49f;
 
@@ -2660,10 +2680,12 @@ ZunResult Player::RegisterChain(u32 param_1)
     }
     g_Player2.playerEffectAttach = 34;
 
+    #ifndef TWO_PLAYER
     if(RegisteringChain(&g_Player3,param_1,3)==ZUN_ERROR){
         return ZUN_ERROR;
     }
     g_Player3.playerEffectAttach = 35;
+    #endif
 
     return ZUN_SUCCESS;
 }
@@ -2678,7 +2700,9 @@ void Player::CutChain()
 {
     CuttingChain(&g_Player);
     CuttingChain(&g_Player2);
+    #ifndef TWO_PLAYER
     CuttingChain(&g_Player3);
+    #endif
 }
 
 // FUNCTION: TH07 0x00442b70

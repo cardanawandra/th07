@@ -416,6 +416,10 @@ bool Host::PollReceive(Pack &outPack, bool &hasData)
     if (hasData)
     {
         // TODO : dynamic player size
+        #ifdef TWO_PLAYER
+        m_guestIp = fromIp;
+        m_guestPort = fromPort;
+        #else
         if(outPack.playerType==2){
             m_guestIp = fromIp;
             m_guestPort = fromPort;
@@ -425,6 +429,7 @@ bool Host::PollReceive(Pack &outPack, bool &hasData)
             m_guestPort3 = fromPort;
             SendPackTo(outPack, m_guestIp, m_guestPort);
         }
+        #endif
     }
 
     return true;

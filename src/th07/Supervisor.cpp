@@ -304,7 +304,9 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
                         pack.ctrl.ctrl_type = Ctrl_Try_Resync;
                         pack.ctrl.resync_setting.frame_to_re_sync = g_resync_stage_frame;
                         g_host.SendPack(pack,2);
+                        #ifndef TWO_PLAYER
                         g_host.SendPack(pack,3);
+                        #endif
                     }
                 }
             }
@@ -330,12 +332,12 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
             pos.z = 0;
             if (g_istry_to_reconnect || ((GetAsyncKeyState(VK_F8) & 0x8000) == 0x8000))
             {
+                #ifdef TWO_PLAYER
                 g_CurFrameRawInput = 0;
                 AsciiManager::AddFormatText(&g_AsciiManager, &pos, "try to reconnect...(%s)", g_is_sync ? "sync" : "desynced");
                 if(g_is_host){
                     Controller::SendKeys(frame_a,2);
-                    Controller::SendKeys(frame_a,3);
-                    if (Controller::RcvPacks(2)&&Controller::RcvPacks(3))
+                    if (Controller::RcvPacks(2))
                     {
                         g_Rng.seed = 0;
                         g_is_connected = true;
@@ -356,6 +358,9 @@ u32 Supervisor::OnUpdate(Supervisor *arg)
                         g_cur_ctrl = IGC_NONE;
                     }
                 }
+                #else
+                exit(0);
+                #endif
             }
             else
             {

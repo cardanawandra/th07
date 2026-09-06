@@ -168,6 +168,10 @@ ZunResult ReplayManager::AddedCallback(ReplayManager *arg)
         // STRING: TH07 0x00496aa8
         arg->data->head.magic = *(u32 *)&"T7RP";
         arg->data->data.shotType = g_GameManager.shotTypeAndCharacter;
+        // netplay
+        arg->data->data.shotType2 = g_GameManager.shotTypeAndCharacter2;
+        arg->data->data.shotType3 = g_GameManager.shotTypeAndCharacter3;
+
         arg->data->head.version = 0x1100;
         arg->data->data.replayVersion = 256;
         arg->data->data.versionChar1 = 'b';
@@ -390,6 +394,15 @@ ZunResult ReplayManager::AddedCallbackDemo(ReplayManager *arg)
     g_GameManager.character = arg->data->data.shotType / 2;
     g_GameManager.shotType = arg->data->data.shotType % 2;
     g_GameManager.shotTypeAndCharacter = arg->data->data.shotType;
+
+    //netplay
+    g_GameManager.character2 = arg->data->data.shotType2 / 2;
+    g_GameManager.shotType2 = arg->data->data.shotType2 % 2;
+    g_GameManager.shotTypeAndCharacter2 = arg->data->data.shotType2;
+    g_GameManager.character3 = arg->data->data.shotType3 / 2;
+    g_GameManager.shotType3 = arg->data->data.shotType3 % 2;
+    g_GameManager.shotTypeAndCharacter3 = arg->data->data.shotType3;
+
     g_GameManager.difficulty = arg->data->data.difficulty;
     g_GameManager.globals->pointItemsCollectedForExtend =
         replayData->pointItemsCollectedForExtend;

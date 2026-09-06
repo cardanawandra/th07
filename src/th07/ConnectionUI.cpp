@@ -205,8 +205,10 @@ void ConnectionUI::CreateControls(HWND hWnd)
     m_btnGuest = CreateWindowA("BUTTON", "as player2", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 140, 150, 100, 32, hWnd,
                                (HMENU)IDC_BTN_START_GUEST, NULL, NULL);
 
+    #ifndef TWO_PLAYER
     m_btnGuest3 = CreateWindowA("BUTTON", "as player3", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 240, 150, 100, 32, hWnd,
                                (HMENU)IDC_BTN_START_GUEST3, NULL, NULL);
+    #endif
 
     CreateWindowA("STATIC", "current state:", WS_CHILD | WS_VISIBLE, 20, 210, 80, 20, hWnd, NULL, NULL, NULL);
 

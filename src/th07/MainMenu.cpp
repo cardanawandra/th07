@@ -23,6 +23,7 @@
 // netplay
 bool g_istry_to_reconnect = false;
 extern bool g_is_connected;
+i32 characterSelect = 1;
 
 // GLOBAL: TH07 0x0049ea7c
 const char *g_DemoReplayPaths[3] = {
@@ -321,6 +322,15 @@ u32 MainMenu::OnUpdatePreInput()
                 g_GameManager.character = this->currentReplay->data.shotType / 2;
                 g_GameManager.shotType = this->currentReplay->data.shotType % 2;
                 g_GameManager.shotTypeAndCharacter = this->currentReplay->data.shotType;
+
+                //netplay
+                g_GameManager.character2 = this->currentReplay->data.shotType2 / 2;
+                g_GameManager.shotType2 = this->currentReplay->data.shotType2 % 2;
+                g_GameManager.shotTypeAndCharacter2 = this->currentReplay->data.shotType2;
+                g_GameManager.character3 = this->currentReplay->data.shotType3 / 2;
+                g_GameManager.shotType3 = this->currentReplay->data.shotType3 % 2;
+                g_GameManager.shotTypeAndCharacter3 = this->currentReplay->data.shotType3;
+
                 i = 0;
                 while (!this->currentReplay->head.stageReplayData[i].data)
                 {
@@ -1131,7 +1141,9 @@ u32 MainMenu::OnUpdateSelectDifficulty()
             {
                 return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
             }
-            this->cursor = g_Supervisor.cfg.defaultDifficulty;
+            // this->cursor = g_Supervisor.cfg.defaultDifficulty;
+            // netplay
+            this->cursor = 1;
             if (this->menuState != MENU_STATE_EXTRA_SELECT_DIFFICULTY)
             {
                 g_AnmManager->SetInterruptActiveVms(this->vms, this->vmCount, 7);
@@ -1184,6 +1196,8 @@ u32 MainMenu::OnUpdateSelectDifficulty()
         }
         if (this->isPracticeMode)
         {
+            //netplay
+            characterSelect = 1;
             SetMenuState(MENU_STATE_PRACTICE_SELECT_CHARACTER);
             this->cursor = 0;
             return CHAIN_CALLBACK_RESULT_CONTINUE;
@@ -1238,6 +1252,10 @@ u32 MainMenu::OnUpdateSelectDifficulty()
             }
             g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
             g_SoundPlayer.ProcessQueues();
+
+            //netplay
+            characterSelect = 1;
+
             if (this->menuState != MENU_STATE_EXTRA_SELECT_DIFFICULTY)
             {
                 if (!g_GameManager.practice)
@@ -1307,6 +1325,25 @@ u32 MainMenu::OnUpdateSelectDifficulty()
 // FUNCTION: TH07 0x00457fe5
 u32 MainMenu::OnUpdateSelectCharacter()
 {
+    // netplay
+    Float3 pos(10,100,0);
+    if(characterSelect==1){
+        AsciiManager::AddFormatText(
+            &g_AsciiManager, &pos, "Player 1 : -"
+        );
+    }else if(characterSelect==2){
+        AsciiManager::AddFormatText(
+            &g_AsciiManager, &pos, "Player 1 : %s\nPlayer 2 : -",
+            g_CharacterAndShottypeReplayStrings[g_GameManager.character * 2 + g_GameManager.shotType]
+        );
+
+    }else if(characterSelect==3){
+        AsciiManager::AddFormatText(
+            &g_AsciiManager, &pos, "Player 1 : %s\nPlayer 2 : %s\nPlayer 3 : -",
+            g_CharacterAndShottypeReplayStrings[g_GameManager.character * 2 + g_GameManager.shotType],
+            g_CharacterAndShottypeReplayStrings[g_GameManager.character2 * 2 + g_GameManager.shotType2]
+        );
+    }
     switch (this->menuSubState)
     {
     case MENU_SUBSTATE_SELECT_INIT:
@@ -1547,9 +1584,20 @@ u32 MainMenu::OnUpdateSelectCharacter()
         }
         if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
         {
-            g_GameManager.character = this->cursor;
+            // netplay
             g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
             g_SoundPlayer.ProcessQueues();
+            if(characterSelect==1){
+                g_GameManager.character = this->cursor;
+            }
+            else if(characterSelect==2){
+                g_GameManager.character2 = this->cursor;
+            }
+            #ifndef TWO_PLAYER
+            else if(characterSelect==3){
+                g_GameManager.character3 = this->cursor;
+            }
+            #endif
             if (this->menuState != MENU_STATE_EXTRA_SELECT_CHARACTER)
             {
                 if (!g_GameManager.practice)
@@ -1572,7 +1620,21 @@ u32 MainMenu::OnUpdateSelectCharacter()
         {
             g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
             g_SoundPlayer.ProcessQueues();
-            g_GameManager.character = this->cursor;
+            if(characterSelect==1){
+                g_GameManager.character = this->cursor;
+            }
+            else if(characterSelect==2){
+                g_GameManager.character2 = this->cursor;
+                characterSelect = 1;
+                return CHAIN_CALLBACK_RESULT_CONTINUE;
+            }
+            #ifndef TWO_PLAYER
+            else if(characterSelect==3){
+                g_GameManager.character3 = this->cursor;
+                characterSelect = 2;
+                return CHAIN_CALLBACK_RESULT_CONTINUE;
+            }
+            #endif
             if (this->menuState != MENU_STATE_EXTRA_SELECT_CHARACTER)
             {
                 if (!g_GameManager.practice)
@@ -1602,6 +1664,40 @@ u32 MainMenu::OnUpdateSelectCharacter()
 // FUNCTION: TH07 0x00459518
 u32 MainMenu::OnUpdateSelectShotType()
 {
+    // netplay
+    Float3 pos(10,100,0);
+    if(characterSelect==1){
+        AsciiManager::AddFormatText(
+            &g_AsciiManager, &pos, "Player 1 : %s",
+            g_CharacterAndShottypeReplayStrings[g_GameManager.character * 2 + this->cursor]
+        );
+    }else if(characterSelect==2){
+        AsciiManager::AddFormatText(
+            &g_AsciiManager, &pos, "Player 1 : %s\nPlayer 2 : %s",
+            g_CharacterAndShottypeReplayStrings[g_GameManager.character * 2 + g_GameManager.shotType],
+            g_CharacterAndShottypeReplayStrings[g_GameManager.character2 * 2 + this->cursor]
+        );
+
+    }else if(characterSelect==3){
+        AsciiManager::AddFormatText(
+            &g_AsciiManager, &pos, "Player 1 : %s\nPlayer 2 : %s\nPlayer 3 : %s",
+            g_CharacterAndShottypeReplayStrings[g_GameManager.character * 2 + g_GameManager.shotType],
+            g_CharacterAndShottypeReplayStrings[g_GameManager.character2 * 2 + g_GameManager.shotType2],
+            g_CharacterAndShottypeReplayStrings[g_GameManager.character3 * 2 + this->cursor]
+        );
+    }
+    i32 characterSelected = g_GameManager.character;
+    i32 shotType = g_GameManager.shotType;
+    if(characterSelect == 2){
+        characterSelected = g_GameManager.character2;
+        shotType = g_GameManager.shotType2;
+    }
+    #ifndef TWO_PLAYER
+    else if(characterSelect == 3){
+        characterSelected = g_GameManager.character3;
+        shotType = g_GameManager.shotType3;
+    }
+    #endif
     switch (this->menuSubState)
     {
     case MENU_SUBSTATE_SELECT_INIT:
@@ -1640,7 +1736,7 @@ u32 MainMenu::OnUpdateSelectShotType()
             this->vms[77].active = 0;
             this->vms[82].active = 0;
             this->vms[85].active = 0;
-            this->cursor = g_GameManager.shotType;
+            this->cursor = shotType;
             if (g_Supervisor.cfg.defaultDifficulty == DIFF_EXTRA)
             {
                 while (!g_GameManager.HasReachedMaxClears(
@@ -1665,7 +1761,8 @@ u32 MainMenu::OnUpdateSelectShotType()
                     }
                 }
             }
-            switch (g_GameManager.character)
+            //netplay
+            switch (characterSelected)
             {
             case CHAR_REIMU:
                 this->vms[72].active = 1;
@@ -1743,7 +1840,7 @@ u32 MainMenu::OnUpdateSelectShotType()
                     }
                 }
             }
-            switch (g_GameManager.character)
+            switch (characterSelected)
             {
             case CHAR_REIMU:
                 g_AnmManager->SetActiveSprite(
@@ -1773,9 +1870,88 @@ u32 MainMenu::OnUpdateSelectShotType()
         }
         if (WAS_PRESSED_RAW(TH_BUTTON_SELECTMENU))
         {
-            g_GameManager.shotType = this->cursor;
+            // netplay
             g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT, 0);
             g_SoundPlayer.ProcessQueues();
+            if(characterSelect == 1){
+                g_GameManager.shotType = this->cursor;
+                characterSelect = 2;
+                this->cursor = 0;
+                if (this->menuState != MENU_STATE_EXTRA_SELECT_SHOTTYPE)
+                {
+                    if (!g_GameManager.practice)
+                    {
+                        SetMenuState(MENU_STATE_NORMAL_SELECT_CHARACTER);
+                    }
+                    else
+                    {
+                        SetMenuState(MENU_STATE_PRACTICE_SELECT_CHARACTER);
+                    }
+                }
+                else
+                {
+                    SetMenuState(MENU_STATE_EXTRA_SELECT_CHARACTER);
+                }
+                this->vms[72].active = 1;
+                this->vms[73].active = 1;
+                this->vms[71].active = 1;
+                this->vms[80].active = 1;
+                this->vms[83].active = 1;
+                this->vms[75].active = 1;
+                this->vms[76].active = 1;
+                this->vms[74].active = 1;
+                this->vms[81].active = 1;
+                this->vms[84].active = 1;
+                this->vms[78].active = 1;
+                this->vms[79].active = 1;
+                this->vms[77].active = 1;
+                this->vms[82].active = 1;
+                this->vms[85].active = 1;
+                return CHAIN_CALLBACK_RESULT_EXECUTE_AGAIN;
+            }
+            if(characterSelect == 2){
+                g_GameManager.shotType2 = this->cursor;
+                #ifndef TWO_PLAYER
+                characterSelect = 3;
+                this->cursor = 0;
+                if (this->menuState != MENU_STATE_EXTRA_SELECT_SHOTTYPE)
+                {
+                    if (!g_GameManager.practice)
+                    {
+                        SetMenuState(MENU_STATE_NORMAL_SELECT_CHARACTER);
+                    }
+                    else
+                    {
+                        SetMenuState(MENU_STATE_PRACTICE_SELECT_CHARACTER);
+                    }
+                }
+                else
+                {
+                    SetMenuState(MENU_STATE_EXTRA_SELECT_CHARACTER);
+                }
+                this->vms[72].active = 1;
+                this->vms[73].active = 1;
+                this->vms[71].active = 1;
+                this->vms[80].active = 1;
+                this->vms[83].active = 1;
+                this->vms[75].active = 1;
+                this->vms[76].active = 1;
+                this->vms[74].active = 1;
+                this->vms[81].active = 1;
+                this->vms[84].active = 1;
+                this->vms[78].active = 1;
+                this->vms[79].active = 1;
+                this->vms[77].active = 1;
+                this->vms[82].active = 1;
+                this->vms[85].active = 1;
+                return CHAIN_CALLBACK_RESULT_EXECUTE_AGAIN;
+                #endif
+            }
+            #ifndef TWO_PLAYER
+            if(characterSelect == 3){
+                g_GameManager.shotType3 = this->cursor;
+            }
+            #endif
             if (!g_GameManager.practice)
             {
                 g_GameManager.difficulty = g_Supervisor.cfg.defaultDifficulty;
@@ -1801,7 +1977,17 @@ u32 MainMenu::OnUpdateSelectShotType()
         if (WAS_PRESSED_RAW(TH_BUTTON_RETURNMENU))
         {
             g_SoundPlayer.PlaySoundByIdx(SOUND_BACK, 0);
-            g_GameManager.shotType = this->cursor;
+            if(characterSelect == 1){
+                g_GameManager.shotType = this->cursor;
+            }
+            if(characterSelect == 2){
+                g_GameManager.shotType2 = this->cursor;
+            }
+            #ifndef TWO_PLAYER
+            if(characterSelect == 3){
+                g_GameManager.shotType3 = this->cursor;
+            }
+            #endif
             if (this->menuState != MENU_STATE_EXTRA_SELECT_SHOTTYPE)
             {
                 if (!g_GameManager.practice)
@@ -1990,7 +2176,12 @@ u32 MainMenu::OnUpdateSelectReplay()
             for (i = 0; i < 15; i++)
             {
                 // STRING: TH07 0x004967bc
-                sprintf(local_54, "./replay/th7_%.2d.rpy", i + 1);
+                // netplay
+                #ifdef TWO_PLAYER
+                sprintf(local_54, "./replay2p/th7_%.2d.rpy", i + 1);
+                #else
+                sprintf(local_54, "./replay3p/th7_%.2d.rpy", i + 1);
+                #endif
                 file = (ReplayFile *)FileSystem::OpenFile(local_54, 1);
                 if (!file)
                 {
@@ -2204,6 +2395,15 @@ u32 MainMenu::OnUpdateSelectReplay()
             g_GameManager.character = this->currentReplay->data.shotType / 2;
             g_GameManager.shotType = this->currentReplay->data.shotType % 2;
             g_GameManager.shotTypeAndCharacter = this->currentReplay->data.shotType;
+
+            // netplay
+            g_GameManager.character2 = this->currentReplay->data.shotType2 / 2;
+            g_GameManager.shotType2 = this->currentReplay->data.shotType2 % 2;
+            g_GameManager.shotTypeAndCharacter2 = this->currentReplay->data.shotType2;
+            g_GameManager.character3 = this->currentReplay->data.shotType3 / 2;
+            g_GameManager.shotType3 = this->currentReplay->data.shotType3 % 2;
+            g_GameManager.shotTypeAndCharacter3 = this->currentReplay->data.shotType3;
+
             ZunMemory::Free(this->currentReplay);
             this->currentReplay = NULL;
             g_GameManager.currentStage =
@@ -2381,10 +2581,10 @@ i32 MainMenu::DrawPracticeMenu()
             .difficultyClearedWithoutRetries[g_Supervisor.cfg.defaultDifficulty];
 
     // ZUN bloat: this is always false, since difficultyClearedWithoutRetries is unsigned
-    if (local_10 < 0)
-    {
-        local_10 = 1;
-    }
+    // if (local_10 < 0)
+    // {
+    //     local_10 = 1;
+    // }
     for (i = 0; i < ARRAY_SIZE_SIGNED(g_StagePracticeStrings); i++)
     {
         g_AsciiManager.isSelected = IsSelected(i);
@@ -2552,6 +2752,11 @@ ZunResult MainMenu::ActualAddedCallback()
     {
         g_GameManager.shotTypeAndCharacter = SHOT_REIMU_A;
         g_GameManager.character = g_GameManager.shotTypeAndCharacter;
+        // netplay
+        g_GameManager.shotTypeAndCharacter2 = SHOT_REIMU_A;
+        g_GameManager.character2 = g_GameManager.shotTypeAndCharacter;
+        g_GameManager.shotTypeAndCharacter3 = SHOT_REIMU_A;
+        g_GameManager.character3 = g_GameManager.shotTypeAndCharacter;
     }
     if (g_GameManager.demo)
     {

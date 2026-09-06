@@ -3,6 +3,17 @@
 
 #include "inttypes.hpp"
 
+// netplay stub for 2p
+#ifdef TWO_PLAYER
+    #define TH_BUTTON_SHOOT3
+    #define TH_BUTTON_BOMB3
+    #define TH_BUTTON_FOCUS3
+    #define TH_BUTTON_UP3
+    #define TH_BUTTON_DOWN3
+    #define TH_BUTTON_LEFT3
+    #define TH_BUTTON_RIGHT3
+#endif
+
 enum TouhouButton
 {
     TH_BUTTON_MENU = 1 << 3,
@@ -47,6 +58,7 @@ enum TouhouButton
         TH_BUTTON_DOWN2 | TH_BUTTON_RIGHT2 | TH_BUTTON_UP2 | TH_BUTTON_LEFT2,
 
     //player 3
+    #ifndef TWO_PLAYER
     TH_BUTTON_SHOOT3 = 1 << 22,
     TH_BUTTON_BOMB3 = 1 << 23,
     TH_BUTTON_FOCUS3 = 1 << 24,
@@ -60,6 +72,7 @@ enum TouhouButton
     TH_BUTTON_DOWN_RIGHT3 = TH_BUTTON_DOWN3 | TH_BUTTON_RIGHT3,
     TH_BUTTON_DIRECTION3 =
         TH_BUTTON_DOWN3 | TH_BUTTON_RIGHT3 | TH_BUTTON_UP3 | TH_BUTTON_LEFT3,
+    #endif
 
     TH_BUTTON_SELECTMENU = TH_BUTTON_ENTER | TH_BUTTON_SHOOT,
     TH_BUTTON_RETURNMENU = TH_BUTTON_MENU | TH_BUTTON_BOMB,

@@ -479,7 +479,9 @@ ZunResult Gui::ActualAddedCallback()
         ClearActiveSprites();
         LoadCharaAnmPerPlayer(g_Player.character,0,0);
         LoadCharaAnmPerPlayer(g_Player2.character,OFFSET_FILE_PLAYER2,OFFSET_PLAYER_2);
+        #ifndef TWO_PLAYER
         LoadCharaAnmPerPlayer(g_Player3.character,OFFSET_FILE_PLAYER3,OFFSET_PLAYER_3);
+        #endif
     }
     else
     {

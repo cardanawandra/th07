@@ -62,6 +62,10 @@ struct ReplayData
     u8 rngValue3;
     char versionChar1;
     u8 shotType;
+    // netplay
+    u8 shotType2;
+    u8 shotType3;
+
     u8 difficulty;
     char date[6];
     char name[12];

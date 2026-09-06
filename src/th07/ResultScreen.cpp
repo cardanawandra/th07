@@ -1451,10 +1451,19 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
         if (this->frameTimer == 0)
         {
             // STRING: TH07 0x004967d4
-            _mkdir("replay");
+            // netplay
+            #ifdef TWO_PLAYER
+            _mkdir("replay2p");
+            #else
+            _mkdir("replay3p");
+            #endif
             for (i = 0; i < ARRAY_SIZE_SIGNED(this->replays); i++)
             {
-                sprintf(replayPath, "./replay/th7_%.2d.rpy", i + 1);
+                #ifdef TWO_PLAYER
+                sprintf(replayPath, "./replay2p/th7_%.2d.rpy", i + 1);
+                #else
+                sprintf(replayPath, "./replay3p/th7_%.2d.rpy", i + 1);
+                #endif
                 replayFile = (ReplayFile *)FileSystem::OpenFile(replayPath, 1);
                 if (!replayFile)
                 {
@@ -1604,8 +1613,14 @@ ZunResult ResultScreen::HandleReplaySaveKeyboard()
             }
             else
             {
-                sprintf(replayPath2, "./replay/th7_%.2d.rpy",
+                // netplay
+                #ifdef TWO_PLAYER
+                sprintf(replayPath2, "./replay2p/th7_%.2d.rpy",
                         this->chosenReplayIdx + 1);
+                #else
+                sprintf(replayPath2, "./replay3p/th7_%.2d.rpy",
+                        this->chosenReplayIdx + 1);
+                #endif
                 ReplayManager::SaveReplay(replayPath2, this->replayName);
                 this->frameTimer = 0;
                 this->resultScreenState = RESULT_STATE_EXITING;

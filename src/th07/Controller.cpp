@@ -418,6 +418,15 @@ u32 Controller::GetInput()
         buttons |= KEY_PRESSED(VK_RETURN, TH_BUTTON_ENTER);
 
         if(g_is_single_mode){
+            #ifdef TWO_PLAYER
+            buttons |= KEY_PRESSED('F', TH_BUTTON_SHOOT2);
+            buttons |= KEY_PRESSED('G', TH_BUTTON_BOMB2);
+            buttons |= KEY_PRESSED('D', TH_BUTTON_FOCUS2);
+            buttons |= KEY_PRESSED('I', TH_BUTTON_UP2);
+            buttons |= KEY_PRESSED('K', TH_BUTTON_DOWN2);
+            buttons |= KEY_PRESSED('J', TH_BUTTON_LEFT2);
+            buttons |= KEY_PRESSED('L', TH_BUTTON_RIGHT2);
+            #else
             //Player 2
             buttons |= KEY_PRESSED('W', TH_BUTTON_SHOOT2);
             buttons |= KEY_PRESSED('E', TH_BUTTON_BOMB2);
@@ -435,6 +444,7 @@ u32 Controller::GetInput()
             buttons |= KEY_PRESSED('K', TH_BUTTON_DOWN3);
             buttons |= KEY_PRESSED('J', TH_BUTTON_LEFT3);
             buttons |= KEY_PRESSED('L', TH_BUTTON_RIGHT3);
+            #endif
         }
     }
     else
@@ -474,6 +484,15 @@ u32 Controller::GetInput()
         buttons |= KEY_PRESSED(DIK_R, TH_BUTTON_RESET);
 
         if(g_is_single_mode){
+            #ifdef TWO_PLAYER
+            buttons |= KEY_PRESSED(DIK_F, TH_BUTTON_SHOOT2);
+            buttons |= KEY_PRESSED(DIK_G, TH_BUTTON_BOMB2);
+            buttons |= KEY_PRESSED(DIK_D, TH_BUTTON_FOCUS2);
+            buttons |= KEY_PRESSED(DIK_I, TH_BUTTON_UP2);
+            buttons |= KEY_PRESSED(DIK_K, TH_BUTTON_DOWN2);
+            buttons |= KEY_PRESSED(DIK_J, TH_BUTTON_LEFT2);
+            buttons |= KEY_PRESSED(DIK_L, TH_BUTTON_RIGHT2);
+            #else
             //Player 2
             buttons |= KEY_PRESSED(DIK_W, TH_BUTTON_SHOOT2);
             buttons |= KEY_PRESSED(DIK_E, TH_BUTTON_BOMB2);
@@ -491,6 +510,7 @@ u32 Controller::GetInput()
             buttons |= KEY_PRESSED(DIK_K, TH_BUTTON_DOWN3);
             buttons |= KEY_PRESSED(DIK_J, TH_BUTTON_LEFT3);
             buttons |= KEY_PRESSED(DIK_L, TH_BUTTON_RIGHT3);
+            #endif
         }
     }
     
@@ -619,10 +639,20 @@ void HandleControlKeys(int frame)
 
 #define TH_ISDOWN(a,mask,b) ((a)&(mask)?(b):0)
 
+#ifdef TWO_PLAYER
+#define CONTROL_RECEIVER_IGC_NONE {IGC_NONE, IGC_NONE, IGC_NONE}
+#define CONTROL_RECEIVER_0 {0, 0, 0}
+#define CONTROL_RECEIVER_FALSE {false,false,false};
+#else
+#define CONTROL_RECEIVER_IGC_NONE {IGC_NONE, IGC_NONE, IGC_NONE, IGC_NONE}
+#define CONTROL_RECEIVER_0 {0,0,0,0}
+#define CONTROL_RECEIVER_FALSE {false,false,false,false};
+#endif
+
 u32 GetKeys(int frame, bool is_in_UI, int &out_ctrl)
 {
     InGameCtrlType self_ctrl = IGC_NONE;
-    InGameCtrlType rcv_ctrl[CONTROL_RECEIVER] = {IGC_NONE, IGC_NONE, IGC_NONE, IGC_NONE};
+    InGameCtrlType rcv_ctrl[CONTROL_RECEIVER] = CONTROL_RECEIVER_IGC_NONE;
 
     out_ctrl = IGC_NONE;
     if (frame - g_delay < 0)
@@ -637,10 +667,10 @@ u32 GetKeys(int frame, bool is_in_UI, int &out_ctrl)
     if (res2 != g_ctrl_self.end())
         self_ctrl = res2->second;
 
-    u32 rcv_key[CONTROL_RECEIVER] = {0,0,0,0};
+    u32 rcv_key[CONTROL_RECEIVER] = CONTROL_RECEIVER_0;
     bool is_sync = true;
 
-    bool has_rcv_data[CONTROL_RECEIVER] = {false,false,false,false};
+    bool has_rcv_data[CONTROL_RECEIVER] = CONTROL_RECEIVER_FALSE;
 
     static bool inited = false;
     bool hasFail = false;

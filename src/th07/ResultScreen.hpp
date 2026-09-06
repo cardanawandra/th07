@@ -437,4 +437,4 @@ struct ResultScreen
     ReplayFile replays[15];
     ReplayFile defaultReplay;
 };
-C_ASSERT(sizeof(ResultScreen) == 0xce6c);
+// C_ASSERT(sizeof(ResultScreen) == 0xce6c);

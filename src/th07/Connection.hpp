@@ -1,6 +1,11 @@
 #pragma once
-#define MULTI_NET_VER 1010
+#define MULTI_NET_VER_ROOT 1010
 #define MULTI_NET_VER_S "Stable Release 1.0.1"
+#ifdef TWO_PLAYER
+    #define MULTI_NET_VER MULTI_NET_VER_ROOT
+#else
+    #define MULTI_NET_VER (MULTI_NET_VER_ROOT+2)
+#endif
 #include "Windows.h"
 #include <Winsock2.h>
 #include <Ws2tcpip.h>
@@ -9,7 +14,12 @@
 #include <string>
 #pragma comment(lib, "Ws2_32.lib")
 #define BITS_32 Bits<32>
-#define CONTROL_RECEIVER 4
+
+#ifdef TWO_PLAYER
+    #define CONTROL_RECEIVER 3
+#else
+    #define CONTROL_RECEIVER 4
+#endif
 
 void PrintError(char *msg);
 void PrintError(char *msg, int err);

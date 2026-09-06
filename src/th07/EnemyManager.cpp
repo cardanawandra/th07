@@ -585,11 +585,21 @@ void Enemy::CheckBulletPlayerCollision(Float3 *bulletCenter,
         // 3 player
         g_Player.CheckGraze(bulletCenter, &grazeSize);
         g_Player2.CheckGraze(bulletCenter, &grazeSize);
+        #ifndef TWO_PLAYER
         g_Player3.CheckGraze(bulletCenter, &grazeSize);
+        #endif
     }
     grazeSize = *bulletSize / 1.5f;
     if (this->canDie && (!this->isBoss && !this->isProjectile))
     {
+        #ifdef TWO_PLAYER
+        if(
+            g_Player.CalcKillboxCollision(bulletCenter, &grazeSize) == 1 ||
+            g_Player2.CalcKillboxCollision(bulletCenter, &grazeSize) == 1
+        ){
+            this->life = this->life - 10;
+        }
+        #else
         if(
             g_Player.CalcKillboxCollision(bulletCenter, &grazeSize) == 1 ||
             g_Player2.CalcKillboxCollision(bulletCenter, &grazeSize) == 1 ||
@@ -597,6 +607,7 @@ void Enemy::CheckBulletPlayerCollision(Float3 *bulletCenter,
         ){
             this->life = this->life - 10;
         }
+        #endif
     }
 }
 
@@ -659,6 +670,15 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
         arg->enemyCountReal++;
         if (enemy->freezeEclDuringBombs)
         {
+            #ifdef TWO_PLAYER
+            if(
+                (g_Player.bombInfo.isInUse || g_Player.playerState != PLAYER_STATE_ALIVE) ||
+                (g_Player2.bombInfo.isInUse || g_Player2.playerState != PLAYER_STATE_ALIVE)
+            ){
+                enemy->timer--;
+                goto LAB_00421da7;
+            }
+            #else
             if(
                 (g_Player.bombInfo.isInUse || g_Player.playerState != PLAYER_STATE_ALIVE) ||
                 (g_Player2.bombInfo.isInUse || g_Player2.playerState != PLAYER_STATE_ALIVE) ||
@@ -667,6 +687,7 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                 enemy->timer--;
                 goto LAB_00421da7;
             }
+            #endif
         }
     HUH:
         if (g_EclManager.RunEcl(enemy) == ZUN_ERROR)
@@ -786,8 +807,11 @@ u32 EnemyManager::OnUpdate(EnemyManager *arg)
                 // 3 players
                 damage = 
                     arg->CalculateDamageAndGetCherry(enemy, &g_Player, collisionOut, stageFactor)+
-                    arg->CalculateDamageAndGetCherry(enemy, &g_Player2, collisionOut, stageFactor)+
+                    arg->CalculateDamageAndGetCherry(enemy, &g_Player2, collisionOut, stageFactor);
+                #ifndef TWO_PLAYER
+                damage +=
                     arg->CalculateDamageAndGetCherry(enemy, &g_Player3, collisionOut, stageFactor);
+                #endif
                 if(damage>0){
                     playedDamageSound = 1;
                 }

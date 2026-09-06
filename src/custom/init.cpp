@@ -221,7 +221,7 @@ INT_PTR __stdcall DialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         }
 
         // ZUN bloat: Why woudl you sprintf over it twice ??????
-        sprintf(str, "%d", padAxisX);
+        // sprintf(str, "%d", padAxisX);
         sprintf(str, "%d", padAxisX);
         SetDlgItemTextA(hWnd, IDC_JOY_DEADZONE_X, str);
 

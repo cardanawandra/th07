@@ -120,10 +120,13 @@ void ItemManager::OnUpdate()
     Player *playerItemCollector;
     Float3 local_20(g_Player.shooterData->itemCollectRadius,
                     g_Player.shooterData->itemCollectRadius, 16.0f);
+    // netplay
     Float3 local_202(g_Player2.shooterData->itemCollectRadius,
                     g_Player2.shooterData->itemCollectRadius, 16.0f);
+    #ifndef TWO_PLAYER
     Float3 local_203(g_Player3.shooterData->itemCollectRadius,
                     g_Player3.shooterData->itemCollectRadius, 16.0f);
+    #endif
 
     itemAcquired = 0;
     this->activeItemCount = 0;
@@ -158,8 +161,11 @@ void ItemManager::OnUpdate()
         {
             if(this->CollectItemPerPlayer(&g_Player,item,g_GameManager.globals->currentPower)){
             }else if(this->CollectItemPerPlayer(&g_Player2,item,g_GameManager.globals->currentPower)){
-            }else if(this->CollectItemPerPlayer(&g_Player3,item,g_GameManager.globals->currentPower)){
             }
+            #ifndef TWO_PLAYER
+            else if(this->CollectItemPerPlayer(&g_Player3,item,g_GameManager.globals->currentPower)){
+            }
+            #endif
             else
             {
                 item->startPosition.x = 0.0f;
@@ -192,9 +198,13 @@ void ItemManager::OnUpdate()
             playerItemCollector = &g_Player;
         }else if (g_Player2.CalcItemBoxCollision(&item->currentPosition, &local_202)){
             playerItemCollector = &g_Player2;
-        }else if (g_Player3.CalcItemBoxCollision(&item->currentPosition, &local_203)){
+        }
+        #ifndef TWO_PLAYER
+        else if (g_Player3.CalcItemBoxCollision(&item->currentPosition, &local_203)){
             playerItemCollector = &g_Player3;
-        }else{
+        }
+        #endif
+        else{
             playerItemCollector = NULL;
         }
         

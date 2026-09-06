@@ -334,7 +334,9 @@ struct Player
 // C_ASSERT(sizeof(Player) == 0xb7e78);
 extern Player g_Player;
 extern Player g_Player2;
+#ifndef TWO_PLAYER
 extern Player g_Player3;
+#endif
 
 typedef i32 (*ShtFunc1)(Player *, PlayerBullet *, i32, struct ShtEntry *);
 extern ShtFunc1 g_ShtFireFuncs[6];

@@ -341,17 +341,17 @@ void GameManager::DrawLoadingSprite()
     spritePos.y = 448.0f;
     spritePos.z = 0.0f;
     memcpy(&spriteVm.pos, spritePos, sizeof(Float3));
-    g_Supervisor.d3dDevice->BeginScene();
 
     // ZUN bloat: This is doing the exact same thing twice
-    ScreenEffect::DrawSquare(&rect, 0xa0000000);
-    g_AnmManager->DrawNoRotation(&spriteVm);
-    g_AnmManager->Flush();
-    g_Supervisor.d3dDevice->EndScene();
-    if (FAILED(g_Supervisor.d3dDevice->Present(NULL, NULL, NULL, NULL)))
-    {
-        g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
-    }
+    // g_Supervisor.d3dDevice->BeginScene();
+    // ScreenEffect::DrawSquare(&rect, 0xa0000000);
+    // g_AnmManager->DrawNoRotation(&spriteVm);
+    // g_AnmManager->Flush();
+    // g_Supervisor.d3dDevice->EndScene();
+    // if (FAILED(g_Supervisor.d3dDevice->Present(NULL, NULL, NULL, NULL)))
+    // {
+    //     g_Supervisor.d3dDevice->Reset(&g_Supervisor.presentParameters);
+    // }
     g_Supervisor.d3dDevice->BeginScene();
     ScreenEffect::DrawSquare(&rect, 0xa0000000);
     g_AnmManager->DrawNoRotation(&spriteVm);
@@ -496,6 +496,10 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     g_Supervisor.checkTiming = 0;
     arg->difficultyMask = 1 << arg->difficulty;
     arg->shotTypeAndCharacter = arg->character * 2 + arg->shotType;
+    // netplay
+    arg->shotTypeAndCharacter2 = arg->character2 * 2 + arg->shotType2;
+    arg->shotTypeAndCharacter3 = arg->character3 * 2 + arg->shotType3;
+
     g_Supervisor.currentTime = timeGetTime();
     g_Supervisor.effectiveFramerateMultiplier = 1.0f;
     if (g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE)
@@ -773,7 +777,11 @@ ZunResult GameManager::AddedCallback(GameManager *arg)
     if (!g_GameManager.replay)
     {
         // STRING: TH07 0x00497e1c
-        ReplayManager::RegisterChain(0, "replay/th7_00.rpy");
+        #ifdef TWO_PLAYER
+        ReplayManager::RegisterChain(0, "replay2p/th7_00.rpy");
+        #else
+        ReplayManager::RegisterChain(0, "replay3p/th7_00.rpy");
+        #endif
     }
     g_Supervisor.LoadAudio(0, g_Stage.stdData->bgmPaths[0]);
     g_Supervisor.LoadAudio(1, g_Stage.stdData->bgmPaths[1]);
@@ -925,7 +933,9 @@ void GameManager::AddCherryPlus(i32 amount)
             // netplay
             g_Player.ActivateBorder();
             g_Player2.ActivateBorder();
+            #ifndef TWO_PLAYER
             g_Player3.ActivateBorder();
+            #endif
         }
     }
     if (this->cherry >= this->cherryMax && oldCherry != this->cherry)

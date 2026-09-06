@@ -1035,7 +1035,10 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
                     collisionRes = g_Player2.CheckGraze(&bullet->pos, &bullet->sprites.grazeSize);
                     if(collisionRes!=0){
                         collisionPlayer = &g_Player2;
-                    }else{
+                        
+                    }
+                    #ifndef TWO_PLAYER
+                    else{
                         collisionRes = g_Player3.CheckGraze(&bullet->pos, &bullet->sprites.grazeSize);
                         if(collisionRes!=0){
                             collisionPlayer = &g_Player3;
@@ -1043,6 +1046,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
                             collisionPlayer = NULL;
                         }
                     }
+                    #endif
                 }
                 if (collisionRes == 1)
                 {
@@ -1068,7 +1072,9 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
                 collisionRes = g_Player2.CalcKillboxCollision(&bullet->pos, &bullet->sprites.grazeSize);
                 if(collisionRes!=0){
                     collisionPlayer = &g_Player2;
-                }else{
+                }
+                #ifndef TWO_PLAYER
+                else{
                     collisionRes = g_Player3.CalcKillboxCollision(&bullet->pos, &bullet->sprites.grazeSize);
                     if(collisionRes!=0){
                         collisionPlayer = &g_Player3;
@@ -1076,6 +1082,7 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
                         collisionPlayer = NULL;
                     }
                 }
+                #endif
             }
 
             if (collisionRes != 0)
@@ -1219,7 +1226,9 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
             {
                 g_Player.CalcLaserHitbox(&laserCenter, &laserHitbox, &laser->pos, laser->angle, laser->timer.GetCurrent() % 12 == 0);
                 g_Player2.CalcLaserHitbox(&laserCenter, &laserHitbox, &laser->pos, laser->angle, laser->timer.GetCurrent() % 12 == 0);
+                #ifndef TWO_PLAYER
                 g_Player3.CalcLaserHitbox(&laserCenter, &laserHitbox, &laser->pos, laser->angle, laser->timer.GetCurrent() % 12 == 0);
+                #endif
             }
             if (laser->timer < laser->startTime)
             {
@@ -1231,7 +1240,9 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
         case LASER_ACTIVE:
             g_Player.CalcLaserHitbox(&laserCenter, &laserHitbox, &laser->pos, laser->angle, laser->timer.GetCurrent() % 12 == 0);
             g_Player2.CalcLaserHitbox(&laserCenter, &laserHitbox, &laser->pos, laser->angle, laser->timer.GetCurrent() % 12 == 0);
+            #ifndef TWO_PLAYER
             g_Player3.CalcLaserHitbox(&laserCenter, &laserHitbox, &laser->pos, laser->angle, laser->timer.GetCurrent() % 12 == 0);
+            #endif
             if (laser->timer < laser->duration)
             {
                 break;
@@ -1269,7 +1280,9 @@ u32 BulletManager::OnUpdate(BulletManager *arg)
             {
                 g_Player.CalcLaserHitbox(&laserCenter, &laserHitbox, &laser->pos, laser->angle, laser->timer.GetCurrent() % 12 == 0);
                 g_Player2.CalcLaserHitbox(&laserCenter, &laserHitbox, &laser->pos, laser->angle, laser->timer.GetCurrent() % 12 == 0);
+                #ifndef TWO_PLAYER
                 g_Player3.CalcLaserHitbox(&laserCenter, &laserHitbox, &laser->pos, laser->angle, laser->timer.GetCurrent() % 12 == 0);
+                #endif
             }
             if (laser->timer < laser->endTime)
             {

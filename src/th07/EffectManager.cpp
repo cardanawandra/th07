@@ -257,8 +257,9 @@ i32 EffectManager::UpdateAttachToPlayer3(Effect *effect)
     {
         return false;
     }
-
+    #ifndef TWO_PLAYER
     effect->pos1 = g_Player3.positionCenter;
+    #endif
     return true;
 }
 // FUNCTION: TH07 0x0041ac30
