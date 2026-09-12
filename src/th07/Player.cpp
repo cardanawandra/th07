@@ -2482,8 +2482,11 @@ ZunResult Player::AddedCallback(Player *arg)
     arg->shotType = g_GameManager.shotType;
     arg->shotTypeAndCharacter = g_GameManager.shotTypeAndCharacter;
     arg->character = g_GameManager.character;
+    u8 alt = 0;
 
     if(arg->playerType==2){
+        if(g_GameManager.character == g_GameManager.character2)
+            alt=1;
         arg->effectOffsetPlayer = 8;
         arg->anmOffsetPlayer = OFFSET_PLAYER_2;
         arg->anmFilePlayer = OFFSET_FILE_PLAYER2;
@@ -2492,6 +2495,14 @@ ZunResult Player::AddedCallback(Player *arg)
         arg->shotType = g_GameManager.shotType2;
     }
     if(arg->playerType==3){
+        if(g_GameManager.character == g_GameManager.character3 ||
+            g_GameManager.character2 == g_GameManager.character3
+        )
+            alt=2;
+        else if(g_GameManager.character == g_GameManager.character3)
+            alt=1;
+        else if(g_GameManager.character2 == g_GameManager.character3)
+            alt=1;
         arg->effectOffsetPlayer = 16;
         arg->anmOffsetPlayer = OFFSET_PLAYER_3;
         arg->anmFilePlayer = OFFSET_FILE_PLAYER3;
@@ -2523,7 +2534,7 @@ ZunResult Player::AddedCallback(Player *arg)
         {
         case CHAR_REIMU:
             // STRING: TH07 0x00496ad8
-            if (g_AnmManager->LoadAnms(ANM_FILE_PLAYER + arg->anmFilePlayer, "data/player00.anm", ANM_OFFSET_PLAYER+arg->anmOffsetPlayer) !=
+            if (g_AnmManager->LoadAnmsProcess(ANM_FILE_PLAYER + arg->anmFilePlayer, "data/player00.anm", ANM_OFFSET_PLAYER+arg->anmOffsetPlayer,alt) !=
                 ZUN_SUCCESS)
             {
                 return ZUN_ERROR;
@@ -2531,7 +2542,7 @@ ZunResult Player::AddedCallback(Player *arg)
             break;
         case CHAR_MARISA:
             // STRING: TH07 0x00496ac4
-            if (g_AnmManager->LoadAnms(ANM_FILE_PLAYER + arg->anmFilePlayer, "data/player01.anm", ANM_OFFSET_PLAYER+arg->anmOffsetPlayer) !=
+            if (g_AnmManager->LoadAnmsProcess(ANM_FILE_PLAYER + arg->anmFilePlayer, "data/player01.anm", ANM_OFFSET_PLAYER+arg->anmOffsetPlayer,alt) !=
                 ZUN_SUCCESS)
             {
                 return ZUN_ERROR;
@@ -2539,7 +2550,7 @@ ZunResult Player::AddedCallback(Player *arg)
             break;
         case CHAR_SAKUYA:
             // STRING: TH07 0x00496ab0
-            if (g_AnmManager->LoadAnms(ANM_FILE_PLAYER + arg->anmFilePlayer, "data/player02.anm", ANM_OFFSET_PLAYER+arg->anmOffsetPlayer) !=
+            if (g_AnmManager->LoadAnmsProcess(ANM_FILE_PLAYER + arg->anmFilePlayer, "data/player02.anm", ANM_OFFSET_PLAYER+arg->anmOffsetPlayer,alt) !=
                 ZUN_SUCCESS)
             {
                 return ZUN_ERROR;

@@ -420,6 +420,12 @@ struct AnmManager
                               u32 outlineType, const char *str, ...);
     i32 ExecuteScript(AnmVm *vm);
     void Flush();
+
+    // multiplayer
+    i32 LoadAnmProcess(i32 textureIdx, AnmRawEntry *rawEntry, i32 spriteIdxOffset,
+                u32 ownsMemory, u8 alt);
+    i32 LoadAnmsProcess(i32 anmIdx, const char *path, i32 spriteIdxOffset, u8 alt);
+
     i32 LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry, i32 spriteIdxOffset,
                 u32 ownsMemory);
     i32 LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset);
@@ -429,8 +435,11 @@ struct AnmManager
                           D3DCOLOR colorKey);
     ZunResult LoadTextureAlphaChannel(i32 textureIdx, const char *texturePath,
                                       i32 formatIdx, D3DCOLOR colorKey);
+    
+    // multiplayer has alt
     ZunResult LoadTextureEmbedded(u32 textureIdx, ZunImageInfoEmbedded *imageInfo,
-                                  D3DCOLOR formatIdx);
+                                  D3DCOLOR formatIdx, u8 alt);
+
     ZunResult PushSprite(VertexTex1DiffuseXyzrhw *spriteVertex);
     void ReleaseAnm(i32 anmIdx);
     void ReleaseSurface(i32 surfaceIdx);

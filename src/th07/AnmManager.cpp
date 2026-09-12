@@ -197,7 +197,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *texturePath,
 // FUNCTION: TH07 0x0044d9e0
 ZunResult AnmManager::LoadTextureEmbedded(u32 textureIdx,
                                           ZunImageInfoEmbedded *imageInfo,
-                                          D3DCOLOR formatIdx)
+                                          D3DCOLOR formatIdx, u8 alt)
 {
     u8 *dst;
     u8 *src;
@@ -230,8 +230,31 @@ ZunResult AnmManager::LoadTextureEmbedded(u32 textureIdx,
     for (i = 0; i < info->height; i++)
     {
         dst = (u8 *)lockedRect.pBits + i * lockedRect.Pitch;
-        src = &imageInfo->data[i * info->width * g_TextureBytesPerPixel[info->format]];
-        memcpy(dst, src, info->width * g_TextureBytesPerPixel[info->format]);
+        src = &imageInfo->data[i * info->width *
+                            g_TextureBytesPerPixel[info->format]];
+
+        if(info->format==5 && alt!=0) // D3DFMT_A4R4G4B4
+        {
+            for (u32 x = 0; x < info->width; x++){
+                u16 color = *(u16 *)src;
+                u16 alpha = color & 0xF000;
+                u16 red   = color & 0x0F00;
+                u16 green = color & 0x00F0;
+                u16 blue  = color & 0x000F;
+                if(alt==1){
+                    //red blue swap
+                    *(u16 *)dst = alpha | blue<<8 | green | red>>8;
+                }else{
+                    //red green swap
+                    *(u16 *)dst = alpha | green<<4 | red>>4 | blue;
+                }
+                src += 2;
+                dst += 2;
+            }
+        }else{
+            memcpy(dst, src,
+                info->width * g_TextureBytesPerPixel[info->format]);
+        }
     }
     surf->UnlockRect();
     if (D3DXCreateTexture(g_Supervisor.d3dDevice, (i32)info->width,
@@ -393,9 +416,13 @@ ZunResult AnmManager::CreateEmptyTexture(i32 textureIdx, u32 width, u32 height,
     return ZUN_SUCCESS;
 }
 
+i32 AnmManager::LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset)
+{
+    return LoadAnmsProcess(anmIdx, path, spriteIdxOffset, 0);
+}
 #pragma var_order(res, startIdx, ownsMemory, entry)
 // FUNCTION: TH07 0x0044df90
-i32 AnmManager::LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset)
+i32 AnmManager::LoadAnmsProcess(i32 anmIdx, const char *path, i32 spriteIdxOffset, u8 alt)
 {
     i32 res;
     u32 ownsMemory;
@@ -411,7 +438,7 @@ i32 AnmManager::LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset)
     }
     while (true)
     {
-        res = LoadAnm(anmIdx, entry, spriteIdxOffset, ownsMemory);
+        res = LoadAnmProcess(anmIdx, entry, spriteIdxOffset, ownsMemory,alt);
         if (res < 0)
         {
             this->anmFiles[startIdx].childCount = anmIdx - startIdx;
@@ -429,11 +456,17 @@ i32 AnmManager::LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset)
     }
 }
 
+i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
+                        i32 spriteIdxOffset, u32 ownsMemory)
+{
+    return LoadAnmProcess(textureIdx, rawEntry, spriteIdxOffset, ownsMemory, 0);
+}
+
 #pragma var_order(id, data, desc, name, rawSprite, i, curSprite, \
                   loadedSprite)
 // FUNCTION: TH07 0x0044e070
-i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
-                        i32 spriteIdxOffset, u32 ownsMemory)
+i32 AnmManager::LoadAnmProcess(i32 textureIdx, AnmRawEntry *rawEntry,
+                        i32 spriteIdxOffset, u32 ownsMemory, u8 alt)
 {
     char *name;
     AnmRawSprite *rawSprite;
@@ -497,7 +530,7 @@ i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
         if (LoadTextureEmbedded(
                 data->textureIdx,
                 (ZunImageInfoEmbedded *)((u8 *)data + data->textureOffset),
-                data->format) != ZUN_SUCCESS)
+                data->format, alt) != ZUN_SUCCESS)
         {
             g_GameErrorContext.Fatal(TH_ERR_EMBED_TEX_LOAD_FAIL);
             return ZUN_ERROR;
