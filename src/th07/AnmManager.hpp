@@ -421,14 +421,11 @@ struct AnmManager
     i32 ExecuteScript(AnmVm *vm);
     void Flush();
 
-    // multiplayer
-    i32 LoadAnmProcess(i32 textureIdx, AnmRawEntry *rawEntry, i32 spriteIdxOffset,
-                u32 ownsMemory, u8 alt);
-    i32 LoadAnmsProcess(i32 anmIdx, const char *path, i32 spriteIdxOffset, u8 alt);
-
+    // multiplayer alt
     i32 LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry, i32 spriteIdxOffset,
-                u32 ownsMemory);
-    i32 LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset);
+                u32 ownsMemory, u8 alt=0);
+    i32 LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset, u8 alt=0);
+
     void LoadSprite(u32 spriteIdx, AnmLoadedSprite *sprite);
     ZunResult LoadSurface(i32 surfaceIdx, const char *path);
     ZunResult LoadTexture(i32 textureIdx, const char *texturePath, i32 formatIdx,

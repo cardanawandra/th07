@@ -416,40 +416,40 @@ void Gui::ShowSpellcard(i32 spellcardSprite, const char *spellcardName)
 }
 
 
-ZunResult LoadCharaAnmPerPlayer(u8 character,i32 offsetFile, i32 offset){
-    switch (character)
+ZunResult LoadCharaAnmPerPlayer(Player *player,i32 offsetFile, i32 offset){
+    switch (player->character)
     {
     case CHAR_REIMU:
-        if (g_AnmManager->LoadAnms(ANM_FILE_FACE+offsetFile, "data/face_rm00.anm", ANM_OFFSET_FACE+offset) !=
+        if (g_AnmManager->LoadAnms(ANM_FILE_FACE+offsetFile, "data/face_rm00.anm", ANM_OFFSET_FACE+offset, player->alt) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
-        if (g_AnmManager->LoadAnms(ANM_FILE_LOADING+offsetFile, "data/loading.anm", ANM_OFFSET_LOADING+offset) !=
+        if (g_AnmManager->LoadAnms(ANM_FILE_LOADING+offsetFile, "data/loading.anm", ANM_OFFSET_LOADING+offset, player->alt) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case CHAR_MARISA:
-        if (g_AnmManager->LoadAnms(ANM_FILE_FACE+offsetFile, "data/face_mr00.anm", ANM_OFFSET_FACE+offset) !=
+        if (g_AnmManager->LoadAnms(ANM_FILE_FACE+offsetFile, "data/face_mr00.anm", ANM_OFFSET_FACE+offset, player->alt) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
-        if (g_AnmManager->LoadAnms(ANM_FILE_LOADING+offsetFile, "data/loading2.anm", ANM_OFFSET_LOADING+offset) !=
+        if (g_AnmManager->LoadAnms(ANM_FILE_LOADING+offsetFile, "data/loading2.anm", ANM_OFFSET_LOADING+offset, player->alt) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
         break;
     case CHAR_SAKUYA:
-        if (g_AnmManager->LoadAnms(ANM_FILE_FACE+offsetFile, "data/face_sk00.anm", ANM_OFFSET_FACE+offset) !=
+        if (g_AnmManager->LoadAnms(ANM_FILE_FACE+offsetFile, "data/face_sk00.anm", ANM_OFFSET_FACE+offset, player->alt) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
         }
-        if (g_AnmManager->LoadAnms(ANM_FILE_LOADING+offsetFile, "data/loading3.anm", ANM_OFFSET_LOADING+offset) !=
+        if (g_AnmManager->LoadAnms(ANM_FILE_LOADING+offsetFile, "data/loading3.anm", ANM_OFFSET_LOADING+offset, player->alt) !=
             ZUN_SUCCESS)
         {
             return ZUN_ERROR;
@@ -477,10 +477,10 @@ ZunResult Gui::ActualAddedCallback()
             return ZUN_ERROR;
         }
         ClearActiveSprites();
-        LoadCharaAnmPerPlayer(g_Player.character,0,0);
-        LoadCharaAnmPerPlayer(g_Player2.character,OFFSET_FILE_PLAYER2,OFFSET_PLAYER_2);
+        LoadCharaAnmPerPlayer(&g_Player,0,0);
+        LoadCharaAnmPerPlayer(&g_Player2,OFFSET_FILE_PLAYER2,OFFSET_PLAYER_2);
         #ifndef TWO_PLAYER
-        LoadCharaAnmPerPlayer(g_Player3.character,OFFSET_FILE_PLAYER3,OFFSET_PLAYER_3);
+        LoadCharaAnmPerPlayer(&g_Player3,OFFSET_FILE_PLAYER3,OFFSET_PLAYER_3);
         #endif
     }
     else

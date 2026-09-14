@@ -326,6 +326,7 @@ struct Player
     u8 character;
     u8 shotType;
     u8 shotTypeAndCharacter;
+    u8 alt;
     // sprite
     i32 anmFilePlayer;
     i32 anmOffsetPlayer;

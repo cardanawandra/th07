@@ -2486,28 +2486,28 @@ ZunResult Player::AddedCallback(Player *arg)
 
     if(arg->playerType==2){
         if(g_GameManager.character == g_GameManager.character2)
-            alt=1;
+            alt = 1;
+        arg->character = g_GameManager.character2;
         arg->effectOffsetPlayer = 8;
         arg->anmOffsetPlayer = OFFSET_PLAYER_2;
         arg->anmFilePlayer = OFFSET_FILE_PLAYER2;
         arg->shotTypeAndCharacter = g_GameManager.shotTypeAndCharacter2;
-        arg->character = g_GameManager.character2;
         arg->shotType = g_GameManager.shotType2;
     }
     if(arg->playerType==3){
         if(g_GameManager.character == g_GameManager.character3 ||
             g_GameManager.character2 == g_GameManager.character3
         )
-            alt=2;
+            alt = 2;
         else if(g_GameManager.character == g_GameManager.character3)
-            alt=1;
+            alt = 1;
         else if(g_GameManager.character2 == g_GameManager.character3)
-            alt=1;
+            alt = 1;
+        arg->character = g_GameManager.character3;
         arg->effectOffsetPlayer = 16;
         arg->anmOffsetPlayer = OFFSET_PLAYER_3;
         arg->anmFilePlayer = OFFSET_FILE_PLAYER3;
         arg->shotTypeAndCharacter = g_GameManager.shotTypeAndCharacter3;
-        arg->character = g_GameManager.character3;
         arg->shotType = g_GameManager.shotType3;
     }
 
@@ -2534,29 +2534,32 @@ ZunResult Player::AddedCallback(Player *arg)
         {
         case CHAR_REIMU:
             // STRING: TH07 0x00496ad8
-            if (g_AnmManager->LoadAnmsProcess(ANM_FILE_PLAYER + arg->anmFilePlayer, "data/player00.anm", ANM_OFFSET_PLAYER+arg->anmOffsetPlayer,alt) !=
+            if (g_AnmManager->LoadAnms(ANM_FILE_PLAYER + arg->anmFilePlayer, "data/player00.anm", ANM_OFFSET_PLAYER+arg->anmOffsetPlayer,alt) !=
                 ZUN_SUCCESS)
             {
                 return ZUN_ERROR;
             }
             break;
         case CHAR_MARISA:
+            if(alt>0)alt+=2;
             // STRING: TH07 0x00496ac4
-            if (g_AnmManager->LoadAnmsProcess(ANM_FILE_PLAYER + arg->anmFilePlayer, "data/player01.anm", ANM_OFFSET_PLAYER+arg->anmOffsetPlayer,alt) !=
+            if (g_AnmManager->LoadAnms(ANM_FILE_PLAYER + arg->anmFilePlayer, "data/player01.anm", ANM_OFFSET_PLAYER+arg->anmOffsetPlayer,alt) !=
                 ZUN_SUCCESS)
             {
                 return ZUN_ERROR;
             }
             break;
         case CHAR_SAKUYA:
+            if(alt>0)alt+=4;
             // STRING: TH07 0x00496ab0
-            if (g_AnmManager->LoadAnmsProcess(ANM_FILE_PLAYER + arg->anmFilePlayer, "data/player02.anm", ANM_OFFSET_PLAYER+arg->anmOffsetPlayer,alt) !=
+            if (g_AnmManager->LoadAnms(ANM_FILE_PLAYER + arg->anmFilePlayer, "data/player02.anm", ANM_OFFSET_PLAYER+arg->anmOffsetPlayer,alt) !=
                 ZUN_SUCCESS)
             {
                 return ZUN_ERROR;
             }
         }
     }
+    arg->alt = alt;
     g_AnmManager->SetAnmIdxAndExecuteScript(&arg->playerSprite, ANM_SCRIPT_PLAYER_IDLE + arg->anmOffsetPlayer);
     arg->positionCenter.x = g_GameManager.arcadeRegionSize.x / 2.0f;
     arg->positionCenter.y = g_GameManager.arcadeRegionSize.y - 64.0f;

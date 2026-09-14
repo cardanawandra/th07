@@ -233,23 +233,112 @@ ZunResult AnmManager::LoadTextureEmbedded(u32 textureIdx,
         src = &imageInfo->data[i * info->width *
                             g_TextureBytesPerPixel[info->format]];
 
-        if(info->format==5 && alt!=0) // D3DFMT_A4R4G4B4
+        if(alt!=0) 
         {
-            for (u32 x = 0; x < info->width; x++){
-                u16 color = *(u16 *)src;
-                u16 alpha = color & 0xF000;
-                u16 red   = color & 0x0F00;
-                u16 green = color & 0x00F0;
-                u16 blue  = color & 0x000F;
-                if(alt==1){
-                    //red blue swap
-                    *(u16 *)dst = alpha | blue<<8 | green | red>>8;
-                }else{
-                    //red green swap
-                    *(u16 *)dst = alpha | green<<4 | red>>4 | blue;
+            // D3DFMT_A4R4G4B4
+            bool fallback=false;
+            if(g_TextureFormatD3D8Mapping[info->format]==D3DFMT_A4R4G4B4){
+                for (i32 x = 0; x < info->width; x++){
+                    u16 color = *(u16 *)src;
+                    u16 alpha = color & 0xF000;
+                    u16 red   = color & 0x0F00;
+                    u16 green = color & 0x00F0;
+                    u16 blue  = color & 0x000F;
+                    u8 r = (u8)(red>>8);
+                    u8 g = (u8)(green>>4);
+                    u8 b = (u8)(blue);
+                    fallback = r>45 && g>18 && b>10 && (r-g)>8 && (g-b)>3;
+                    if(fallback){
+                        *(u16 *)dst=color;
+                        src += 2;
+                        dst += 2;
+                        continue;
+                    }
+                    if(alt==1){
+                        //red blue swap
+                        *(u16 *)dst = alpha | blue<<8 | green | red>>8;
+                    }else if(alt==2){
+                        //red green swap
+                        *(u16 *)dst = alpha | green<<4 | red>>4 | blue;
+                    }else if(alt==3){
+                        //black to red
+                        if(red < 0x0400 && green <0x0040 && blue < 0x0004)
+                        {
+                            // red = 0x0E00;
+                            // use green instead, because we swap it
+                            green = 0x00E0;                            
+                        }
+                        *(u16 *)dst = alpha | green<<4 | red>>4 | blue;
+                    }else if(alt==4){
+                        //black to purple
+                        if(red < 0x0400 && green <0x0040 && blue < 0x0004)
+                        {
+                            red = 0x0700;
+     						blue = 0x0008;
+                        }
+                        *(u16 *)dst = alpha | red | green | blue;
+                    }else if(alt==5){
+                        //red blue swap
+                        *(u16 *)dst = alpha | blue<<8 | green | red>>8;
+                    }else if(alt==6){
+                        //red green swap
+                        *(u16 *)dst = alpha | green<<4 | red>>4 | blue;
+                    }
+                    src += 2;
+                    dst += 2;
                 }
-                src += 2;
-                dst += 2;
+            }
+            if(g_TextureFormatD3D8Mapping[info->format]==D3DFMT_A8R8G8B8){
+                for (i32 x = 0; x < info->width; x++){
+                    u32 color = *(u32 *)src;
+                    u32 alpha = color & 0xFF000000;
+                    u32 red   = color & 0x00FF0000;
+                    u32 green = color & 0x0000FF00;
+                    u32 blue  = color & 0x000000FF;
+
+                    u8 r = (u8)(red>>16);
+                    u8 g = (u8)(green>>8);
+                    u8 b = (u8)(blue);
+                    fallback = r>90 && g>36 && b>20 && (r-g)>16 && (g-b)>6;
+                    if(fallback){
+                        *(u32 *)dst=color;
+                        src += 4;
+                        dst += 4;
+                        continue;
+                    }
+                    if(alt==1){
+                        //red blue swap
+                        *(u32 *)dst = alpha | blue<<16 | green | red>>16;
+                    }else if(alt==2){
+                        //red green swap
+                        *(u32 *)dst = alpha | green<<8 | red>>8 | blue;
+                    }else if(alt==3){
+                        //black to red
+                        if(red < 0x00440000 && green <0x00004400 && blue < 0x00000044)
+                        {
+                            // red = 0x0E00;
+                            // use green instead, because we swap it
+                            green = 0x0000EE00;                            
+                        }
+                        *(u32 *)dst = alpha | green<<8 | red>>8 | blue;
+                    }else if(alt==4){
+                        //black to purple
+                        if(red < 0x00440000 && green <0x00004400 && blue < 0x00000044)
+                        {
+                            red = 0x00770000;
+     						blue = 0x00000088;
+                        }
+                        *(u32 *)dst = alpha | red | green | blue;
+                    }else if(alt==5){
+                        //red blue swap
+                        *(u32 *)dst = alpha | blue<<16 | green | red>>16;
+                    }else if(alt==6){
+                        //red green swap
+                        *(u32 *)dst = alpha | green<<8 | red>>8 | blue;
+                    }
+                    src += 4;
+                    dst += 4;
+                }
             }
         }else{
             memcpy(dst, src,
@@ -416,13 +505,9 @@ ZunResult AnmManager::CreateEmptyTexture(i32 textureIdx, u32 width, u32 height,
     return ZUN_SUCCESS;
 }
 
-i32 AnmManager::LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset)
-{
-    return LoadAnmsProcess(anmIdx, path, spriteIdxOffset, 0);
-}
 #pragma var_order(res, startIdx, ownsMemory, entry)
 // FUNCTION: TH07 0x0044df90
-i32 AnmManager::LoadAnmsProcess(i32 anmIdx, const char *path, i32 spriteIdxOffset, u8 alt)
+i32 AnmManager::LoadAnms(i32 anmIdx, const char *path, i32 spriteIdxOffset, u8 alt)
 {
     i32 res;
     u32 ownsMemory;
@@ -438,7 +523,7 @@ i32 AnmManager::LoadAnmsProcess(i32 anmIdx, const char *path, i32 spriteIdxOffse
     }
     while (true)
     {
-        res = LoadAnmProcess(anmIdx, entry, spriteIdxOffset, ownsMemory,alt);
+        res = LoadAnm(anmIdx, entry, spriteIdxOffset, ownsMemory,alt);
         if (res < 0)
         {
             this->anmFiles[startIdx].childCount = anmIdx - startIdx;
@@ -456,16 +541,10 @@ i32 AnmManager::LoadAnmsProcess(i32 anmIdx, const char *path, i32 spriteIdxOffse
     }
 }
 
-i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
-                        i32 spriteIdxOffset, u32 ownsMemory)
-{
-    return LoadAnmProcess(textureIdx, rawEntry, spriteIdxOffset, ownsMemory, 0);
-}
-
 #pragma var_order(id, data, desc, name, rawSprite, i, curSprite, \
                   loadedSprite)
 // FUNCTION: TH07 0x0044e070
-i32 AnmManager::LoadAnmProcess(i32 textureIdx, AnmRawEntry *rawEntry,
+i32 AnmManager::LoadAnm(i32 textureIdx, AnmRawEntry *rawEntry,
                         i32 spriteIdxOffset, u32 ownsMemory, u8 alt)
 {
     char *name;
